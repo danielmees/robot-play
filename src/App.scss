@@ -20,6 +20,14 @@ body {
   }
 }
 
+h1 {
+  font-size: 20px;
+
+  @media only screen and (min-width: 600px) {
+    font-size: 32px;
+  }
+}
+
 .tabletop-container {
   width: 100%;
   position: relative;
@@ -32,14 +40,14 @@ body {
       display: inline-block;
       width: 20%;
       padding-top: 20%;
-      background-color: #F3E2A9;
+      background-color: #ffe6e6;
 
       &:nth-of-type(-2n+5), 
       &:nth-of-type(5) ~ *:nth-of-type(-2n+9), 
       &:nth-of-type(10) ~ *:nth-of-type(-2n+15), 
       &:nth-of-type(15) ~ *:nth-of-type(-2n+19), 
       &:nth-of-type(20) ~ *:nth-of-type(-2n+25) {
-          background-color: #ECF6CE;
+          background-color:  #66CCFF;
       }
     }
   }
