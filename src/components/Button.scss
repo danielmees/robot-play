@@ -1,0 +1,33 @@
+.btn {
+    font-size: 18px;
+    padding: 15px 0;
+    margin: 10px;
+    border: none;
+    outline: none;
+    width: calc(25% - 20px);
+    color: #fff;
+    background-color: #01838C;
+    border-radius: 3px;
+
+    &--up {
+        background-color: #CE0058;
+    }
+
+    &--down {
+        background-color: #672146;
+    }
+
+    &--left {
+        background-color: #C95109;
+    }
+
+    &--right {
+        background-color: #741915;
+    }
+
+    &:hover {
+        opacity: .7;
+        cursor: pointer;
+    }
+
+}
