@@ -169,7 +169,7 @@ class App extends Component {
   }
 
   render() {
-    const { currentPositionX, currentPositionY } = this.state;
+    const { currentPositionX, currentPositionY, commandInvalidMessage } = this.state;
     return (
       <div className="container">
         <h1>Robot Play</h1>
@@ -180,7 +180,11 @@ class App extends Component {
         </div>
         <div className="tabletop-container">
           {this.renderTableTop()}
-          <Avatar type='robot' avatarRef={node =>  this.robotRef = node} />
+          <Avatar 
+            type='robot' 
+            avatarRef={node =>  this.robotRef = node} 
+            response={commandInvalidMessage}
+          />
         </div>
         {this.renderControlPanel()}
       </div>

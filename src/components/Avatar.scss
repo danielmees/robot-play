@@ -8,4 +8,44 @@
     background-size: 80% 80%;
     background-position: center;
     background-repeat: no-repeat;
+
+    &__response {
+        position: absolute;
+        font-size: 12px;
+        bottom: 100%;
+        left: 0;
+        width: 100%;
+        background-color: #fff;
+        border: 1px solid #2D333F;
+        border-radius: 15px;
+        padding: 5px 2px;
+
+        @media only screen and (min-width: 768px) {
+            font-size: 14px;
+            left: 30px;
+            width: calc(100% + 10px);
+        }
+
+        &--sad {
+            color: #0000ff;
+        }
+
+        &:after {
+            display: block;
+            position: absolute;
+            content: '';
+            width: 10px;
+            height: 10px;
+            left: calc(50% - 10px);
+            background-color: #fff;
+            border-left: 1px solid #2D333F;
+            border-bottom: 1px solid #2D333F;
+            transform: rotate(-45deg);
+
+            @media only screen and (min-width: 768px) {
+                left: 25px;
+            }
+        }
+    }
 }
+
