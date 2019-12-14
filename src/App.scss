@@ -9,12 +9,11 @@ body {
 
 .container {
   text-align: center;
-  margin: 30px auto;
+  margin: 20px auto;
   padding: 0 15px;
   color: #2D333F;
 
   @media only screen and (min-width: 600px) {
-    margin: 60px auto;
     padding: 0;
     max-width: 600px;
   }
@@ -26,6 +25,21 @@ h1 {
   @media only screen and (min-width: 600px) {
     font-size: 32px;
   }
+}
+
+.status {
+  text-align: left;
+  font-size: 20px;
+  margin-bottom: 10px;
+  padding: 10px;
+  background-color: #CE0058;
+  border-radius: 3px;
+  color: #fff;
+
+  span {
+    margin-left: 20px;
+  }
+  
 }
 
 .tabletop-container {
@@ -40,7 +54,7 @@ h1 {
       display: inline-block;
       width: 20%;
       padding-top: 20%;
-      background-color: #ffe6e6;
+      background-color: #FFE6E6;
 
       &:nth-of-type(-2n+5), 
       &:nth-of-type(5) ~ *:nth-of-type(-2n+9), 

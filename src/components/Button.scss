@@ -25,6 +25,10 @@
         background-color: #741915;
     }
 
+    &--big {
+        width: 60% !important;
+    }
+
     &:hover {
         opacity: .7;
         cursor: pointer;

@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import './App.scss';
 import Avatar from './components/Avatar';
 import Button from './components/Button';
+import Input from './components/Input';
 
 class App extends Component {
   constructor() {
@@ -10,7 +11,10 @@ class App extends Component {
       currentPositionX: 0,
       currentPositionY: 0,
       moving: false,
-      movingDistance: 0
+      movingDistance: 0,
+      resetPositionX: '',
+      resetPositionY: '',
+      commandInvalidMessage: ''
     };
 
     this.robotRef = React.createRef();
@@ -35,6 +39,31 @@ class App extends Component {
     this.robotRef.style.left = (currentPositionX * tableTopCellWidth) + 'px';
     this.robotRef.style.top = (currentPositionY  * tableTopCellWidth) + 'px';
     this.setState({ movingDistance: tableTopCellWidth });
+  }
+
+  calculateNewPositions = (direction) => {
+    let newPositionX, newPositionY;
+    const { currentPositionX, currentPositionY } = this.state;
+    switch(direction) {
+      case 'up':
+        newPositionX = currentPositionX;
+        newPositionY = currentPositionY - 1;
+        break;
+      case 'down':
+        newPositionX = currentPositionX;
+        newPositionY = currentPositionY + 1;
+        break;
+      case 'left':
+        newPositionX = currentPositionX - 1;
+        newPositionY = currentPositionY;
+        break;
+      case 'right':
+        newPositionX = currentPositionX + 1;
+        newPositionY = currentPositionY;
+        break;
+      default: // do nothing
+    }
+    return { newPositionX, newPositionY };
   }
 
   moveRobot = (startTime, startingPoint, distance, direction, duration) => {
@@ -67,33 +96,18 @@ class App extends Component {
       );
     } else {
       this.setState({ moving: false });
-      let newPositionX, newPositionY;
-      const { currentPositionX, currentPositionY } = this.state;
-      switch(direction) {
-        case 'up':
-          newPositionX = currentPositionX;
-          newPositionY = currentPositionY - 1;
-          break;
-        case 'down':
-          newPositionX = currentPositionX;
-          newPositionY = currentPositionY + 1;
-          break;
-        case 'left':
-          newPositionX = currentPositionX - 1;
-          newPositionY = currentPositionY;
-          break;
-        case 'right':
-          newPositionX = currentPositionX + 1;
-          newPositionY = currentPositionY;
-          break;
-        default: // do nothing
-      }
+      const { newPositionX, newPositionY } = this.calculateNewPositions(direction);
       this.setState({ currentPositionX: newPositionX, currentPositionY: newPositionY });
     }
   }
 
+
   handleMoveClick = (direction) => {
-    if (!this.state.moving) {
+    this.setState({ commandInvalidMessage: '' });
+    const { newPositionX, newPositionY } = this.calculateNewPositions(direction);
+    if (newPositionX < 0 || newPositionX > 4 || newPositionY < 0 || newPositionY > 4) {
+      this.setState({ commandInvalidMessage: "I am at the edge, can't move further!" });
+    } else if (!this.state.moving) {
       this.setState({ moving: true });
       // get different starting point before moving horizontally and vertically 
       const startingPoint = (direction === 'left' || direction === 'right') ? this.robotRef.offsetLeft : this.robotRef.offsetTop;
@@ -102,6 +116,23 @@ class App extends Component {
       requestAnimationFrame(() => 
         this.moveRobot(startTime, startingPoint, this.state.movingDistance, direction, 600) 
       );
+    }
+  }
+
+  reSetRobotPosition = () => {
+    this.setState({ commandInvalidMessage: '' });
+    const { currentPositionX, currentPositionY, movingDistance, resetPositionX, resetPositionY } = this.state;
+    // validate command commandInvalidMessage
+    if (!resetPositionX || !resetPositionY) {
+      this.setState({ commandInvalidMessage: 'Please type position number(s).' });
+    } else if (resetPositionX < 0 || resetPositionX > 4 || resetPositionY < 0 || resetPositionY > 4) {
+      this.setState({ commandInvalidMessage: 'Invalid command!' });
+    } else if (resetPositionX === currentPositionX && resetPositionY === currentPositionY ) {
+      this.setState({ commandInvalidMessage: 'Same location!' });
+    } else {
+      this.robotRef.style.left = (resetPositionX * movingDistance) + 'px';
+      this.robotRef.style.top = (resetPositionY  * movingDistance) + 'px';
+      this.setState({ currentPositionX: resetPositionX, currentPositionY: resetPositionY });
     }
   }
 
@@ -115,6 +146,7 @@ class App extends Component {
   }
 
   renderControlPanel = () => {
+    const { resetPositionX, resetPositionY } = this.state;
     return <div className="control-panel">
       <div className="navigations">
         <Button label='Up' type='up' handleClick={() => this.handleMoveClick('up')} />
@@ -122,13 +154,30 @@ class App extends Component {
         <Button label='Left' type='left' handleClick={() => this.handleMoveClick('left')} />
         <Button label='Right' type='right' handleClick={() => this.handleMoveClick('right')} />
       </div>
+      <div className="reset-btns">
+        <Input placeholder='X' 
+          onChange={(evt) => this.setState({ resetPositionX: parseInt(evt.target.value, 10) })} 
+          value={isNaN(resetPositionX) ? '' : resetPositionX}
+          />
+        <Input placeholder='Y' 
+          onChange={(evt) => this.setState({ resetPositionY: parseInt(evt.target.value, 10) })} 
+          value={isNaN(resetPositionY) ? '' : resetPositionY}
+        />
+        <Button label='Set Position' type='big' handleClick={() => this.reSetRobotPosition()} />
+      </div>
     </div>
   }
 
   render() {
+    const { currentPositionX, currentPositionY } = this.state;
     return (
       <div className="container">
         <h1>Robot Play</h1>
+        <div className="status">
+          Status: &nbsp;&nbsp;
+          <span>X: <strong>{currentPositionX}</strong></span>
+          <span>Y: <strong>{currentPositionY}</strong></span>
+        </div>
         <div className="tabletop-container">
           {this.renderTableTop()}
           <Avatar type='robot' avatarRef={node =>  this.robotRef = node} />
