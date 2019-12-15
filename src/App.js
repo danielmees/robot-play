@@ -181,8 +181,6 @@ class App extends Component {
 
   handleInputChange(value) {
     const valueToNum = parseInt(value, 10);
-    console.log(value);
-    console.log(valueToNum);
     if (isNaN(valueToNum)) {
       return false;
     } else {
