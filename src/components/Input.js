@@ -7,7 +7,7 @@ const Input = ({ placeholder, onChange, value }) => {
         className="number-input"
         placeholder={placeholder}
         onChange={(evt) => onChange(evt)}
-        value={value.toString()}
+        value={value === false ? '' : value.toString()}
     /> 
 }
 

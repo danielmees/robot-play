@@ -12,8 +12,8 @@ class App extends Component {
       currentPositionY: 0,
       moving: false,
       movingDistance: 0,
-      resetPositionX: '',
-      resetPositionY: '',
+      resetPositionX: false,
+      resetPositionY: false,
       commandInvalidMessage: '',
       crownPositionX: 0,
       crownPositionY: 0,
@@ -154,8 +154,8 @@ class App extends Component {
     this.setState({ commandInvalidMessage: '', happyMessage: '' });
     const { currentPositionX, currentPositionY, movingDistance, resetPositionX, resetPositionY, crownPositionX, crownPositionY } = this.state;
     // validate command commandInvalidMessage
-    if (!resetPositionX || !resetPositionY) {
-      this.setState({ commandInvalidMessage: 'Please type position number(s).' });
+    if (resetPositionX === false || resetPositionY === false) {
+      this.setState({ commandInvalidMessage: 'Please enter position number(s).' });
     } else if (resetPositionX < 0 || resetPositionX > 4 || resetPositionY < 0 || resetPositionY > 4) {
       this.setState({ commandInvalidMessage: 'Invalid command!' });
     } else if (resetPositionX === currentPositionX && resetPositionY === currentPositionY ) {
@@ -179,6 +179,17 @@ class App extends Component {
     </div>
   }
 
+  handleInputChange(value) {
+    const valueToNum = parseInt(value, 10);
+    console.log(value);
+    console.log(valueToNum);
+    if (isNaN(valueToNum)) {
+      return false;
+    } else {
+      return valueToNum;
+    }
+  }
+
   renderControlPanel() {
     const { resetPositionX, resetPositionY } = this.state;
     return <div className="control-panel">
@@ -190,12 +201,12 @@ class App extends Component {
       </div>
       <div className="reset-btns">
         <Input placeholder='X' 
-          onChange={(evt) => this.setState({ resetPositionX: parseInt(evt.target.value, 10) })} 
-          value={isNaN(resetPositionX) ? '' : resetPositionX}
+          onChange={(evt) => this.setState({ resetPositionX: this.handleInputChange(evt.target.value) })} 
+          value={resetPositionX}
           />
         <Input placeholder='Y' 
-          onChange={(evt) => this.setState({ resetPositionY: parseInt(evt.target.value, 10) })} 
-          value={isNaN(resetPositionY) ? '' : resetPositionY}
+          onChange={(evt) => this.setState({ resetPositionY: this.handleInputChange(evt.target.value) })} 
+          value={resetPositionY}
         />
         <Button label='Set Position' type='big' handleClick={() => this.reSetRobotPosition()} />
       </div>
