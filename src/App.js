@@ -14,15 +14,19 @@ class App extends Component {
       movingDistance: 0,
       resetPositionX: '',
       resetPositionY: '',
-      commandInvalidMessage: ''
+      commandInvalidMessage: '',
+      crownPositionX: 0,
+      crownPositionY: 0,
+      happyMessage: ''
     };
 
     this.robotRef = React.createRef();
+    this.crownRef = React.createRef();
   }
 
   componentDidMount() {
     this.calculateMovingDistance();
-
+    this.placeCrown();
     // calculate moving distance again when screen size changes for responsive
     window.addEventListener('resize', () => this.calculateMovingDistance());
   }
@@ -31,17 +35,41 @@ class App extends Component {
     window.removeEventListener('resize', () => this.calculateMovingDistance());
   }
 
-  calculateMovingDistance = () => {
-    const { currentPositionX, currentPositionY } = this.state;
+  generateRandomNumber(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  placeCrown() {
+    let crownPositionX = this.generateRandomNumber(0, 4);
+    let crownPositionY = this.generateRandomNumber(0, 4);
+    // redo placement if the location is the same as the robot
+    if (crownPositionX === 0 && crownPositionY === 0) {
+      this.placeCrown();
+    } else {
+      this.setState({ crownPositionX, crownPositionY });
+      const tableTopCellWidth = this.tableTopRef.clientWidth / 5;
+      this.crownRef.style.left = (crownPositionX * tableTopCellWidth) + 'px';
+      this.crownRef.style.top = (crownPositionY  * tableTopCellWidth) + 'px';
+    }
+  }
+
+  calculateMovingDistance() {
+    const { currentPositionX, currentPositionY, crownPositionX, crownPositionY } = this.state;
     // calculate robot moving distance according to table cell width
     const tableTopCellWidth = this.tableTopRef.clientWidth / 5;
     // adjust robot position if window size changes 
     this.robotRef.style.left = (currentPositionX * tableTopCellWidth) + 'px';
     this.robotRef.style.top = (currentPositionY  * tableTopCellWidth) + 'px';
-    this.setState({ movingDistance: tableTopCellWidth });
+    this.setState({ movingDistance: tableTopCellWidth }, () => {
+      // adjust position of crown for window resize
+      if (crownPositionX !== 0 && crownPositionY !== 0) {
+        this.crownRef.style.left = (crownPositionX * this.state.movingDistance) + 'px';
+        this.crownRef.style.top = (crownPositionY  * this.state.movingDistance) + 'px';
+      }
+    });
   }
 
-  calculateNewPositions = (direction) => {
+  calculateNewPositions(direction) {
     let newPositionX, newPositionY;
     const { currentPositionX, currentPositionY } = this.state;
     switch(direction) {
@@ -66,7 +94,7 @@ class App extends Component {
     return { newPositionX, newPositionY };
   }
 
-  moveRobot = (startTime, startingPoint, distance, direction, duration) => {
+  moveRobot(startTime, startingPoint, distance, direction, duration) {
     const timestamp = new Date().getTime();
     const runTime = timestamp - startTime;
     let progress = runTime / duration;
@@ -98,12 +126,15 @@ class App extends Component {
       this.setState({ moving: false });
       const { newPositionX, newPositionY } = this.calculateNewPositions(direction);
       this.setState({ currentPositionX: newPositionX, currentPositionY: newPositionY });
+      if (newPositionX === this.state.crownPositionX && newPositionY === this.state.crownPositionY) {
+        this.setState({ happyMessage: 'Oh, there is a crown!' });
+      }
     }
   }
 
 
-  handleMoveClick = (direction) => {
-    this.setState({ commandInvalidMessage: '' });
+  handleMoveClick(direction) {
+    this.setState({ commandInvalidMessage: '', happyMessage: '' });
     const { newPositionX, newPositionY } = this.calculateNewPositions(direction);
     if (newPositionX < 0 || newPositionX > 4 || newPositionY < 0 || newPositionY > 4) {
       this.setState({ commandInvalidMessage: "I am at the edge, can't move further!" });
@@ -119,9 +150,9 @@ class App extends Component {
     }
   }
 
-  reSetRobotPosition = () => {
-    this.setState({ commandInvalidMessage: '' });
-    const { currentPositionX, currentPositionY, movingDistance, resetPositionX, resetPositionY } = this.state;
+  reSetRobotPosition() {
+    this.setState({ commandInvalidMessage: '', happyMessage: '' });
+    const { currentPositionX, currentPositionY, movingDistance, resetPositionX, resetPositionY, crownPositionX, crownPositionY } = this.state;
     // validate command commandInvalidMessage
     if (!resetPositionX || !resetPositionY) {
       this.setState({ commandInvalidMessage: 'Please type position number(s).' });
@@ -133,10 +164,13 @@ class App extends Component {
       this.robotRef.style.left = (resetPositionX * movingDistance) + 'px';
       this.robotRef.style.top = (resetPositionY  * movingDistance) + 'px';
       this.setState({ currentPositionX: resetPositionX, currentPositionY: resetPositionY });
+      if (resetPositionX === crownPositionX && resetPositionY === crownPositionY) {
+        this.setState({ happyMessage: 'Oh, there is a crown!' });
+      }
     }
   }
 
-  renderTableTop = () => {
+  renderTableTop() {
     const tableTopArray = [...Array(25).keys()];
     return <div className="tabletop" ref={node =>  this.tableTopRef = node}>
       {tableTopArray.map(item => 
@@ -145,7 +179,7 @@ class App extends Component {
     </div>
   }
 
-  renderControlPanel = () => {
+  renderControlPanel() {
     const { resetPositionX, resetPositionY } = this.state;
     return <div className="control-panel">
       <div className="navigations">
@@ -169,7 +203,7 @@ class App extends Component {
   }
 
   render() {
-    const { currentPositionX, currentPositionY, commandInvalidMessage } = this.state;
+    const { currentPositionX, currentPositionY, commandInvalidMessage, crownPositionX, crownPositionY, happyMessage } = this.state;
     return (
       <div className="container">
         <h1>Robot Play</h1>
@@ -183,7 +217,13 @@ class App extends Component {
           <Avatar 
             type='robot' 
             avatarRef={node =>  this.robotRef = node} 
-            response={commandInvalidMessage}
+            sadResponse={commandInvalidMessage}
+            happyResponse={happyMessage}
+          />
+          <Avatar 
+            type='crown' 
+            avatarRef={node =>  this.crownRef = node} 
+            hidden={currentPositionX === crownPositionX && currentPositionY === crownPositionY}
           />
         </div>
         {this.renderControlPanel()}
